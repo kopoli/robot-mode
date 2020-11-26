@@ -108,6 +108,14 @@
 	   ;; If previous line is indented, indent to that level
 	   (setq indent previous-indent)))
 
+    ;; Toggle indentation if the line is already indented
+    (when (and (> indent 0)
+	       (= indent (- (point) (line-beginning-position)))
+	       ;; (= (point) (line-end-position))
+
+	       )
+      (setq indent 0))
+
     (back-to-indentation)
     (delete-region (line-beginning-position)  (point))
     (indent-to indent)))
