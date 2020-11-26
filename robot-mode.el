@@ -29,6 +29,13 @@
 
 ;;; Code:
 
+(defgroup robot-mode nil
+  ""
+  )
+
+(defcustom robot-mode-basic-offset standard-indent
+  "")
+
 (defvar robot-mode-font-lock-keywords
   '(("#.*" . font-lock-comment-face)
     ("^\\*.*" . font-lock-keyword-face)
@@ -60,25 +67,42 @@
 (defun robot-mode-indent-line ()
   (interactive)
   (let* ((indent 0)
-	(previous-indent
-	 (save-excursion
-	   (beginning-of-line)
-	   (re-search-backward "^\\s-*[[:print:]]" nil t)
-	   (back-to-indentation)
-	   ;; (message "LINE STRING %d %s" (point) (buffer-substring (point) (line-end-position)))
-	   (- (point) (line-beginning-position)))))
+	 (section
+	  (downcase (or (save-excursion
+			 (re-search-backward "^\\s-*\\*+\\s-*\\([a-zA-Z ]+\\)" nil t)
+			 (match-string-no-properties 1)) "")))
+	 (back-to-previous-line
+	  (lambda ()
+	    (beginning-of-line)
+	    (re-search-backward "^\\s-*[[:print:]]" nil t)
+	    (back-to-indentation)))
+	 (previous-indent
+	  (save-excursion
+	    (funcall back-to-previous-line)
+	    ;; (mssage "LINE STRING %d %s" (point) (buffer-substring (point) (line-end-position)))
+	    (- (point) (line-beginning-position)))))
 
     ;; (message "PREVINDENT %s" previous-indent)
 
-    (cond ((= previous-indent 0)
-	   (save-excursion
-	     (beginning-of-line)
-	     (re-search-backward "^\\s-*[[:print:]]" nil t)
+    ;; (message "Section on %s" section)
+
+    (cond ((not (string-match "task.*\\|test case.*\\|keyword.*" section))
+	   ;; indent only lines in the above section
+	   (setq indent 0))
+
+	  ;; header line should not be indented
+	  ((save-excursion
 	     (back-to-indentation)
+	     (looking-at "\\*"))
+	   (setq indent 0))
+
+	  ((= previous-indent 0)
+	   (save-excursion
+	     (funcall back-to-previous-line)
 	     (setq indent
 		   ;; If the previous line is not a header
 		   (cond ((not (looking-at "^\\*"))
-			  standard-indent)
+			  robot-mode-basic-offset)
 			 (t 0)))))
 	  (t
 	   ;; If previous line is indented, indent to that level
