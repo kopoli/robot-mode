@@ -1,0 +1,96 @@
+;;; robot-mode.el --- Robot framework major-mode
+
+;; Copyright (C) 2020 Kalle Kankare
+
+;; Author: Kalle Kankare <kalle.kankare@iki.fi>
+;; Maintainer: Kalle Kankare <kalle.kankare@iki.fi>
+;; Created: 26 Nov 2020
+;; Keywords: major-mode
+;; Version: 0.1.0
+
+;; This file is not part of GNU Emacs.
+
+;; This file is free software: you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; This file is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+
+;; You should have received a copy of the GNU General Public License
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+
+;;; Commentary:
+
+;; TODO
+
+;;; Code:
+
+(defvar robot-mode-font-lock-keywords
+  '(("#.*" . font-lock-comment-face)
+    ("^\\*.*" . font-lock-keyword-face)
+    ("\\[\\sw+\\]" . font-lock-constant-face)
+    ("\\.\\.\\." . font-lock-constant-face)
+    ("^\\(Library\\|Resource\\|Suite Setup\\)\s-*\\(.*\\)"
+     (1 font-lock-preprocessor-face t) (2 font-lock-constant-face t))
+    ("^\\(Documentation\\|Tags\\)\s-*\\(.*\\)"
+     (1 font-lock-preprocessor-face t) (2 font-lock-string-face t))
+    ("[@$&%]{\\([0-9]+\\|true\\|false\\)}" . font-lock-constant-face)
+    ("[@$&%]{[^}]*}" . font-lock-variable-name-face)
+    ("^[^ \t].*" . font-lock-function-name-face)
+    )
+  "")
+
+(defvar robot-mode-syntax-table
+  (with-syntax-table (make-syntax-table)
+    (modify-syntax-entry ?# "<")
+    (modify-syntax-entry ?\n ">")
+    (syntax-table))
+  "")
+
+(defvar robot-mode-map
+  (let ((map (make-sparse-keymap)))
+    ;; (define-key map )
+    map)
+  "")
+
+(defun robot-mode-indent-line ()
+  (interactive)
+  ;; (call-interactively #'indent-relative)
+  ;; (message "%s" (call-interactively #'indent-relative))
+  (let (indent
+	(previous-indent
+	 (save-excursion
+	   (forward-line -1)
+	   (back-to-indentation)
+	   (- (point) (line-beginning-position)))))
+
+    (if (not (= previous-indent 0))
+
+	)
+
+    (message "PREVINDENT %s" previous-indent)
+    )
+
+  )
+
+;; DEBUG
+;; TEST command: emacs -Q --load ./robot-mode.el -- testfile.robot
+;;;###autoload
+(add-to-list 'auto-mode-alist '("\\.\\(resource\\|robot\\)\\'" . robot-mode))
+
+;;;###autoload
+(define-derived-mode robot-mode prog-mode "Robot"
+  "Major mode for editing Robot framework files
+
+\\{robot-mode-map}"
+
+  (setq-local indent-line-function #'robot-mode-indent-line)
+  (setq-local font-lock-defaults '(robot-mode-font-lock-keywords))
+  (setq-local comment-start "#")
+  (setq-local outline-regexp "^\\*\\*\\*\\|^\\sw"))
+
+;;; robot-mode.el ends here
