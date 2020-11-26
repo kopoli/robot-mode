@@ -59,23 +59,34 @@
 
 (defun robot-mode-indent-line ()
   (interactive)
-  ;; (call-interactively #'indent-relative)
-  ;; (message "%s" (call-interactively #'indent-relative))
-  (let (indent
+  (let* ((indent 0)
 	(previous-indent
 	 (save-excursion
-	   (forward-line -1)
+	   (beginning-of-line)
+	   (re-search-backward "^\\s-*[[:print:]]" nil t)
 	   (back-to-indentation)
+	   ;; (message "LINE STRING %d %s" (point) (buffer-substring (point) (line-end-position)))
 	   (- (point) (line-beginning-position)))))
 
-    (if (not (= previous-indent 0))
+    ;; (message "PREVINDENT %s" previous-indent)
 
-	)
+    (cond ((= previous-indent 0)
+	   (save-excursion
+	     (beginning-of-line)
+	     (re-search-backward "^\\s-*[[:print:]]" nil t)
+	     (back-to-indentation)
+	     (setq indent
+		   ;; If the previous line is not a header
+		   (cond ((not (looking-at "^\\*"))
+			  standard-indent)
+			 (t 0)))))
+	  (t
+	   ;; If previous line is indented, indent to that level
+	   (setq indent previous-indent)))
 
-    (message "PREVINDENT %s" previous-indent)
-    )
-
-  )
+    (back-to-indentation)
+    (delete-region (line-beginning-position)  (point))
+    (indent-to indent)))
 
 ;; DEBUG
 ;; TEST command: emacs -Q --load ./robot-mode.el -- testfile.robot
