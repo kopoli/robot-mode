@@ -41,14 +41,13 @@
     ("^\\*.*" . font-lock-keyword-face)
     ("\\[\\sw+\\]" . font-lock-constant-face)
     ("\\.\\.\\." . font-lock-constant-face)
-    ("^\\(Library\\|Resource\\|Suite Setup\\)\s-*\\(.*\\)"
+    ("^\\(Library\\|Resource\\|Suite Setup\\|Suite Teardown\\):?\s-*\\(.*\\)"
      (1 font-lock-preprocessor-face t) (2 font-lock-constant-face t))
-    ("^\\(Documentation\\|Tags\\)\s-*\\(.*\\)"
+    ("^\\(Documentation\\|Tags\\|Metadata\\):?\s-*\\(.*\\)"
      (1 font-lock-preprocessor-face t) (2 font-lock-string-face t))
     ("[@$&%]{\\([0-9]+\\|true\\|false\\)}" . font-lock-constant-face)
     ("[@$&%]{[^}]*}" . font-lock-variable-name-face)
-    ("^[^ \t].*" . font-lock-function-name-face)
-    )
+    ("^[^ \t].*" . font-lock-function-name-face))
   "")
 
 (defvar robot-mode-syntax-table
@@ -132,7 +131,7 @@
 \\{robot-mode-map}"
 
   (setq-local indent-line-function #'robot-mode-indent-line)
-  (setq-local font-lock-defaults '(robot-mode-font-lock-keywords))
+  (setq-local font-lock-defaults '(robot-mode-font-lock-keywords nil t))
   (setq-local comment-start "#")
   (setq-local outline-regexp "^\\*\\*\\*\\|^\\sw"))
 
