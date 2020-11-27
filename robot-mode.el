@@ -64,37 +64,37 @@
   "")
 
 (defun robot-mode-indent-line ()
+  ""
   (interactive)
   (let* ((indent 0)
+	 ;; Get the current section
 	 (section
 	  (downcase (or (save-excursion
 			 (re-search-backward "^\\s-*\\*+\\s-*\\([a-zA-Z ]+\\)" nil t)
 			 (match-string-no-properties 1)) "")))
+	 ;; function to get the previous non-empty line
 	 (back-to-previous-line
 	  (lambda ()
 	    (beginning-of-line)
 	    (re-search-backward "^\\s-*[[:print:]]" nil t)
 	    (back-to-indentation)))
+	 ;; The amount of indent of previous non-empty line
 	 (previous-indent
 	  (save-excursion
 	    (funcall back-to-previous-line)
-	    ;; (mssage "LINE STRING %d %s" (point) (buffer-substring (point) (line-end-position)))
 	    (- (point) (line-beginning-position)))))
 
-    ;; (message "PREVINDENT %s" previous-indent)
-
-    ;; (message "Section on %s" section)
-
     (cond ((not (string-match "task.*\\|test case.*\\|keyword.*" section))
-	   ;; indent only lines in the above section
+	   ;; Indent only lines in the above sections
 	   (setq indent 0))
 
-	  ;; header line should not be indented
+	  ;; Header line should not be indented
 	  ((save-excursion
 	     (back-to-indentation)
 	     (looking-at "\\*"))
 	   (setq indent 0))
 
+	  ;; Indent only lines that are inside keywords
 	  ((= previous-indent 0)
 	   (save-excursion
 	     (funcall back-to-previous-line)
@@ -109,12 +109,10 @@
 
     ;; Toggle indentation if the line is already indented
     (when (and (> indent 0)
-	       (= indent (- (point) (line-beginning-position)))
-	       ;; (= (point) (line-end-position))
-
-	       )
+	       (= indent (- (point) (line-beginning-position))))
       (setq indent 0))
 
+    ;; Do the actual indenting
     (back-to-indentation)
     (delete-region (line-beginning-position)  (point))
     (indent-to indent)))
