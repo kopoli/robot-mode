@@ -65,7 +65,7 @@
 
 (defvar robot-mode-map
   (let ((map (make-sparse-keymap)))
-    (define-key map (kbd "C-c C-a") #'robot-mode-align-defun)
+    (define-key map (kbd "C-c C-a") #'robot-mode-align-region-or-defun)
     (define-key map (kbd "C-c C-j") #'robot-mode-continue-new-line)
     map)
   "")
@@ -175,6 +175,13 @@
 	       (end-of-defun)
 	       (point))))
     (robot-mode-align beg end)))
+
+(defun robot-mode-align-region-or-defun ()
+  "Calls robot-mode-align if region is active, otherwise calls robot-mode-align-defun."
+  (interactive)
+  (if (region-active-p)
+      (robot-mode-align (region-beginning) (region-end))
+    (robot-mode-align-defun)))
 
 (defun robot-mode-continue-new-line ()
   ""
