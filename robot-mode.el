@@ -154,16 +154,10 @@ Used as `indent-line-function' of the mode."
 	  (downcase (or (save-excursion
 			 (re-search-backward "^\\s-*\\*+\\s-*\\([a-zA-Z ]+\\)" nil t)
 			 (match-string-no-properties 1)) "")))
-	 ;; function to get the previous non-empty line
-	 (back-to-previous-line
-	  (lambda ()
-	    (beginning-of-line)
-	    (re-search-backward "^\\s-*[[:print:]]" nil t)
-	    (back-to-indentation)))
 	 ;; The amount of indent of previous non-empty line
 	 (previous-indent
 	  (save-excursion
-	    (funcall back-to-previous-line)
+	    (robot-mode--back-to-previous-line)
 	    (- (point) (line-beginning-position)))))
 
     (cond ((not (string-match "task.*\\|test case.*\\|keyword.*" section))
@@ -179,7 +173,7 @@ Used as `indent-line-function' of the mode."
 	  ;; Indent only lines that are inside keywords
 	  ((= previous-indent 0)
 	   (save-excursion
-	     (funcall back-to-previous-line)
+	     (robot-mode--back-to-previous-line)
 	     (setq indent
 		   ;; If the previous line is not a header
 		   (cond ((not (looking-at "^\\*"))
