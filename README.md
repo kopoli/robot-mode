@@ -50,6 +50,20 @@ To:
         [Documentation]    A very long text
         ...    | that describes the keyword.
 
+#### Add spacing for an argument
+
+Robot framework separates arguments to keywords with 2 or more spaces. The
+`C-c C-SPC' sets the whitespace amount around point to exactly
+`robot-mode-argument-separator`. For example (| denotes the cursor):
+
+    Example Keyword
+        [Arguments]    ${first}|${second}
+
+To:
+
+    Example Keyword
+        [Arguments]    ${first}    |${second}
+
 ### Limitations
 
 - Currently supports only the Space separated format:
@@ -101,6 +115,10 @@ Call ‘robot-mode-align’ if region is active, otherwise call ‘robot-mode-al
 Split current line at point and continue in the next line.
 
 Prefix the continuation with indentation, ellipsis and spacing.
+
+#### `(robot-mode-add-argument)`
+
+Add exactly ‘robot-mode-argument-separator’ spaces to point.
 
 -----
 <div style="padding-top:15px;color: #d0d0d0;">
