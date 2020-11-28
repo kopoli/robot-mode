@@ -33,14 +33,15 @@
 ;; A Robot Framework major mode for Emacs. Robot Framework is a framework for
 ;; acceptance testing.
 
-;; https://robotframework.org
-;; https://robotframework.org/robotframework/latest/RobotFrameworkUserGuide.html
+;; - https://robotframework.org
+;; - https://robotframework.org/robotframework/latest/RobotFrameworkUserGuide.html
 
 ;; This major mode provides the following:
 ;; - Syntax highlighting.
 ;; - Indentation.
 ;; - Alignment of keyword contents.
 ;; - Line continuation in Robot Framework syntax.
+;; - A helper for adding necessary spaces between arguments.
 
 ;; #### Alignment of keyword contents
 
