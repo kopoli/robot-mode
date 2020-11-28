@@ -7,7 +7,7 @@
 ;; Created: 26 Nov 2020
 ;; Keywords: languages files
 ;; URL: https://github.com/kopoli/robot-mode
-;; Version: 0.1.0
+;; Version: 0.5.0
 ;; Package-Requires: ((emacs "26.1"))
 
 ;; This file is not part of GNU Emacs.
