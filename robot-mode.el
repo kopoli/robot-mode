@@ -38,7 +38,8 @@
 
 ;; This major mode provides the following:
 ;; - Syntax highlighting.
-;; - Indentation and alignment.
+;; - Indentation.
+;; - Alignment of keyword contents.
 ;; - Line continuation in Robot Framework syntax.
 
 ;; #### Alignment of keyword contents
