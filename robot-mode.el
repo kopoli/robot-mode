@@ -1,11 +1,12 @@
-;;; robot-mode.el --- Robot framework major-mode
+;;; robot-mode.el --- Robot framework major-mode  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2020 Kalle Kankare
 
 ;; Author: Kalle Kankare <kalle.kankare@iki.fi>
 ;; Maintainer: Kalle Kankare <kalle.kankare@iki.fi>
 ;; Created: 26 Nov 2020
-;; Keywords: major-mode
+;; Keywords: languages files
+;; URL: https://github.com/kopoli/robot-mode
 ;; Version: 0.1.0
 ;; Package-Requires: ((emacs "26.1"))
 
@@ -32,15 +33,24 @@
 
 (require 'align)
 
-(defgroup robot-mode nil
-  ""
-  )
+(defgroup robot nil
+  "Major mode for editing Robot Framework files."
+  :prefix "robot-mode-"
+  :group 'languages
+  :link '(url-link :tag "Github" "https://github.com/kopoli/robot-mode")
+  :link '(url-link :tag "Documentation" "https://robotframework.org/robotframework/latest/RobotFrameworkUserGuide.html"))
 
 (defcustom robot-mode-basic-offset standard-indent
-  "")
+  "The amount of indentation for test and keyword steps."
+  :type 'integer
+  :group 'robot
+  :safe 'integerp)
 
-(defcustom robot-mode-field-separator standard-indent
-  "")
+(defcustom robot-mode-argument-separator standard-indent
+  "The amount of spaces between different arguments to keywords."
+  :type 'integer
+  :group 'robot
+  :safe 'integerp)
 
 (defvar robot-mode-font-lock-keywords
   '(("#.*" . font-lock-comment-face)
@@ -54,23 +64,24 @@
     ("[@$&%]{\\([0-9]+\\|true\\|false\\)}" . font-lock-constant-face)
     ("[@$&%]{[^}]*}" . font-lock-variable-name-face)
     ("^[^ \t].*" . font-lock-function-name-face))
-  "")
+  "Default `font-lock-keywords' for Robot mode.")
 
 (defvar robot-mode-syntax-table
   (with-syntax-table (make-syntax-table)
     (modify-syntax-entry ?# "<")
     (modify-syntax-entry ?\n ">")
     (syntax-table))
-  "")
+  "Syntax table for Robot mode.")
 
 (defvar robot-mode-map
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "C-c C-a") #'robot-mode-align-region-or-defun)
-    (define-key map (kbd "C-c C-j") #'robot-mode-continue-new-line)
+    (define-key map (kbd "C-c C-j") #'robot-mode-split-continuation)
     map)
-  "")
+  "Key map for Robot mode.")
 
 (defun robot-mode-syntax-propertize (start end)
+  "Propertize text between START and END."
   (funcall
    (syntax-propertize-rules
     ;; Single space between non-space characters is part of the symbol syntax
@@ -78,13 +89,15 @@
    start end))
 
 (defun robot-mode--back-to-previous-line ()
-  "Get to the previous non-empty line"
+  "Move point to the previous non-empty line."
   (beginning-of-line)
   (re-search-backward "^\\s-*[[:print:]]" nil t)
   (back-to-indentation))
 
 (defun robot-mode-indent-line ()
-  ""
+  "Indent current line in Robot mode.
+
+Used as `indent-line-function' of the mode."
   (interactive)
   (let* ((indent 0)
 	 ;; Get the current section
@@ -137,35 +150,38 @@
     (delete-region (line-beginning-position)  (point))
     (indent-to indent)))
 
-(defun robot-mode-beginning-of-defun (&optional args)
-  ""
+(defun robot-mode-beginning-of-defun ()
+  "Move the point to the beginning of the current defun.
+
+Defuns are the steps of a keyword, test or task. This is used as
+`beginning-of-defun-function' of the mode."
   (re-search-backward "^\\S-" nil t))
 
-(defun robot-mode-end-of-defun (&optional args)
-  ""
+(defun robot-mode-end-of-defun ()
+  "Move the point to the end of the current defun.
+
+Defuns are the steps of a keyword, test or task. This is used as
+`end-of-defun-function' of the mode."
   ;; If at the beginning of the defun
   (when (looking-at "^\\S-")
     (forward-char))
 
   (re-search-forward "^\\S-" nil t)
   (robot-mode--back-to-previous-line)
-  (forward-line)
-)
+  (forward-line))
 
 (defun robot-mode-align (beg end)
-  ""
+  "Align the contents of the region between BEG and END."
   (interactive
    (list (region-beginning) (region-end)))
 
-  (message "begin %d end %d" beg end)
-
+  ;; Align only with spaces
   (let ((align-to-tab-stop nil))
-    (align-regexp beg end "\\(\\s-\\s-+\\)"  1 robot-mode-field-separator t))
-  (indent-region beg end)
-)
+    (align-regexp beg end "\\(\\s-\\s-+\\)"  1 robot-mode-argument-separator t))
+  (indent-region beg end))
 
 (defun robot-mode-align-defun ()
-  ""
+  "Align the contents current defun."
   (interactive)
   (let ((beg (save-excursion
 		(beginning-of-defun)
@@ -177,18 +193,20 @@
     (robot-mode-align beg end)))
 
 (defun robot-mode-align-region-or-defun ()
-  "Calls robot-mode-align if region is active, otherwise calls robot-mode-align-defun."
+  "Call `robot-mode-align' if region is active, otherwise call `robot-mode-align-defun'."
   (interactive)
   (if (region-active-p)
       (robot-mode-align (region-beginning) (region-end))
     (robot-mode-align-defun)))
 
-(defun robot-mode-continue-new-line ()
-  ""
+(defun robot-mode-split-continuation ()
+  "Split current line at point and continue in the next line.
+
+Prefix the continuation with indentation, ellipsis and spacing."
   (interactive)
   (newline)
   (insert "...")
-  (insert (make-string robot-mode-field-separator ? ))
+  (insert (make-string robot-mode-argument-separator ? ))
   (indent-region (line-beginning-position) (line-end-position)))
 
 ;;;###autoload
