@@ -66,6 +66,7 @@
 (defvar robot-mode-map
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "C-c C-a") #'robot-mode-align-defun)
+    (define-key map (kbd "C-c C-j") #'robot-mode-continue-new-line)
     map)
   "")
 
@@ -174,6 +175,14 @@
 	       (end-of-defun)
 	       (point))))
     (robot-mode-align beg end)))
+
+(defun robot-mode-continue-new-line ()
+  ""
+  (interactive)
+  (newline)
+  (insert "...")
+  (insert (make-string robot-mode-field-separator ? ))
+  (indent-region (line-beginning-position) (line-end-position)))
 
 ;;;###autoload
 (add-to-list 'auto-mode-alist '("\\.\\(resource\\|robot\\)\\'" . robot-mode))
