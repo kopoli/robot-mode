@@ -7,6 +7,7 @@
 ;; Created: 26 Nov 2020
 ;; Keywords: major-mode
 ;; Version: 0.1.0
+;; Package-Requires: ((emacs "26.1"))
 
 ;; This file is not part of GNU Emacs.
 
@@ -29,11 +30,16 @@
 
 ;;; Code:
 
+(require 'align)
+
 (defgroup robot-mode nil
   ""
   )
 
 (defcustom robot-mode-basic-offset standard-indent
+  "")
+
+(defcustom robot-mode-field-separator standard-indent
   "")
 
 (defvar robot-mode-font-lock-keywords
@@ -59,7 +65,7 @@
 
 (defvar robot-mode-map
   (let ((map (make-sparse-keymap)))
-    ;; (define-key map )
+    (define-key map (kbd "C-c C-a") #'robot-mode-align-defun)
     map)
   "")
 
@@ -69,6 +75,12 @@
     ;; Single space between non-space characters is part of the symbol syntax
     ("\\([^ ] [^ ]\\)" (1 "_")))
    start end))
+
+(defun robot-mode--back-to-previous-line ()
+  "Get to the previous non-empty line"
+  (beginning-of-line)
+  (re-search-backward "^\\s-*[[:print:]]" nil t)
+  (back-to-indentation))
 
 (defun robot-mode-indent-line ()
   ""
@@ -124,8 +136,45 @@
     (delete-region (line-beginning-position)  (point))
     (indent-to indent)))
 
-;; DEBUG
-;; TEST command: emacs -Q --load ./robot-mode.el -- testfile.robot
+(defun robot-mode-beginning-of-defun (&optional args)
+  ""
+  (re-search-backward "^\\S-" nil t))
+
+(defun robot-mode-end-of-defun (&optional args)
+  ""
+  ;; If at the beginning of the defun
+  (when (looking-at "^\\S-")
+    (forward-char))
+
+  (re-search-forward "^\\S-" nil t)
+  (robot-mode--back-to-previous-line)
+  (forward-line)
+)
+
+(defun robot-mode-align (beg end)
+  ""
+  (interactive
+   (list (region-beginning) (region-end)))
+
+  (message "begin %d end %d" beg end)
+
+  (let ((align-to-tab-stop nil))
+    (align-regexp beg end "\\(\\s-\\s-+\\)"  1 robot-mode-field-separator t))
+  (indent-region beg end)
+)
+
+(defun robot-mode-align-defun ()
+  ""
+  (interactive)
+  (let ((beg (save-excursion
+		(beginning-of-defun)
+		(forward-line)
+		(point)))
+	(end (save-excursion
+	       (end-of-defun)
+	       (point))))
+    (robot-mode-align beg end)))
+
 ;;;###autoload
 (add-to-list 'auto-mode-alist '("\\.\\(resource\\|robot\\)\\'" . robot-mode))
 
@@ -138,6 +187,8 @@
   (setq-local indent-line-function #'robot-mode-indent-line)
   (setq-local font-lock-defaults '(robot-mode-font-lock-keywords nil t))
   (setq-local comment-start "#")
+  (setq-local beginning-of-defun-function #'robot-mode-beginning-of-defun)
+  (setq-local end-of-defun-function #'robot-mode-end-of-defun)
   (setq-local syntax-propertize-function #'robot-mode-syntax-propertize)
   (setq-local outline-regexp "^\\*\\*\\*\\|^\\sw"))
 
