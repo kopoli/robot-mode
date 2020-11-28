@@ -209,8 +209,6 @@ Prefix the continuation with indentation, ellipsis and spacing."
   (insert (make-string robot-mode-argument-separator ? ))
   (indent-region (line-beginning-position) (line-end-position)))
 
-;;;###autoload
-(add-to-list 'auto-mode-alist '("\\.\\(robot\\|resource\\)\\'" . robot-mode))
 
 ;;;###autoload
 (define-derived-mode robot-mode prog-mode "Robot"
@@ -225,6 +223,9 @@ Prefix the continuation with indentation, ellipsis and spacing."
   (setq-local end-of-defun-function #'robot-mode-end-of-defun)
   (setq-local syntax-propertize-function #'robot-mode-syntax-propertize)
   (setq-local outline-regexp "^\\*\\|^\\sw"))
+
+;;;###autoload
+(add-to-list 'auto-mode-alist '("\\.\\(robot\\|resource\\)\\'" . robot-mode))
 
 (provide 'robot-mode)
 
