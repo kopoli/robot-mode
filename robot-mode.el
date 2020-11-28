@@ -1,4 +1,4 @@
-;;; robot-mode.el --- Robot framework major-mode  -*- lexical-binding: t; -*-
+;;; robot-mode.el --- Major-mode for Robot Framework files -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2020 Kalle Kankare
 
