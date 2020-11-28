@@ -73,6 +73,20 @@
 ;;         [Documentation]    A very long text
 ;;         ...    | that describes the keyword.
 
+;; #### Add spacing for an argument
+
+;; Robot framework separates arguments to keywords with 2 or more spaces. The
+;; `C-c C-SPC' sets the whitespace amount around point to exactly
+;; `robot-mode-argument-separator'. For example (| denotes the cursor):
+
+;;     Example Keyword
+;;         [Arguments]    ${first}|${second}
+
+;; To:
+
+;;     Example Keyword
+;;         [Arguments]    ${first}    |${second}
+
 ;; ### Limitations
 
 ;; - Currently supports only the Space separated format:
@@ -128,6 +142,7 @@
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "C-c C-a") #'robot-mode-align-region-or-defun)
     (define-key map (kbd "C-c C-j") #'robot-mode-split-continuation)
+    (define-key map (kbd "C-c C-SPC") #'robot-mode-add-argument)
     map)
   "Key map for Robot mode.")
 
@@ -262,6 +277,11 @@ Prefix the continuation with indentation, ellipsis and spacing."
   (insert (make-string robot-mode-argument-separator ? ))
   (indent-region (line-beginning-position) (line-end-position)))
 
+(defun robot-mode-add-argument ()
+  "Add exactly `robot-mode-argument-separator' spaces to point."
+  (interactive)
+  (delete-horizontal-space)
+  (insert (make-string robot-mode-argument-separator ? )))
 
 ;;;###autoload
 (define-derived-mode robot-mode prog-mode "Robot"
