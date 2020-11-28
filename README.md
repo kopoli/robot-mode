@@ -1,6 +1,6 @@
 <a href="https://github.com/kopoli/robot-mode"><img src="https://www.gnu.org/software/emacs/images/emacs.png" alt="Emacs Logo" width="80" height="80" align="right"></a>
 ## robot-mode.el
-*Major-mode for Robot Framework*
+*Major-mode for Robot Framework files*
 
 ---
 [![License GPLv3](https://img.shields.io/badge/license-GPL_v3-green.svg)](http://www.gnu.org/licenses/gpl-3.0.html)
@@ -82,21 +82,21 @@ Propertize text between START and END.
 
 Indent current line in Robot mode.
 
-Used as ‘indent-line-function’ of the mode.
+Used as `indent-line-function` of the mode.
 
 #### `(robot-mode-beginning-of-defun)`
 
 Move the point to the beginning of the current defun.
 
 Defuns are the steps of a keyword, test or task. This is used as
-‘beginning-of-defun-function’ of the mode.
+`beginning-of-defun-function` of the mode.
 
 #### `(robot-mode-end-of-defun)`
 
 Move the point to the end of the current defun.
 
 Defuns are the steps of a keyword, test or task. This is used as
-‘end-of-defun-function’ of the mode.
+`end-of-defun-function` of the mode.
 
 #### `(robot-mode-align BEG END)`
 
@@ -108,7 +108,7 @@ Align the contents current defun.
 
 #### `(robot-mode-align-region-or-defun)`
 
-Call ‘robot-mode-align’ if region is active, otherwise call ‘robot-mode-align-defun’.
+Call `robot-mode-align` if region is active, otherwise call `robot-mode-align-defun`.
 
 #### `(robot-mode-split-continuation)`
 
@@ -118,7 +118,7 @@ Prefix the continuation with indentation, ellipsis and spacing.
 
 #### `(robot-mode-add-argument)`
 
-Add exactly ‘robot-mode-argument-separator’ spaces to point.
+Add exactly `robot-mode-argument-separator` spaces to point.
 
 -----
 <div style="padding-top:15px;color: #d0d0d0;">
