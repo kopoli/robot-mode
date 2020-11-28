@@ -251,7 +251,13 @@ Defuns are the steps of a keyword, test or task. This is used as
 
 Prefix the continuation with indentation, ellipsis and spacing."
   (interactive)
-  (newline)
+  ;; If point is between the indentation and beginning of line add the
+  ;; ellipsis to the previous line. Otherwise add to the next line.
+  (if (not (looking-back "^\\s-*" nil nil))
+      (newline)
+    (beginning-of-line)
+    (newline)
+    (forward-line -1))
   (insert "...")
   (insert (make-string robot-mode-argument-separator ? ))
   (indent-region (line-beginning-position) (line-end-position)))
