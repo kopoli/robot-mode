@@ -63,6 +63,13 @@
     map)
   "")
 
+(defun robot-mode-syntax-propertize (start end)
+  (funcall
+   (syntax-propertize-rules
+    ;; Single space between non-space characters is part of the symbol syntax
+    ("\\([^ ] [^ ]\\)" (1 "_")))
+   start end))
+
 (defun robot-mode-indent-line ()
   ""
   (interactive)
@@ -131,6 +138,7 @@
   (setq-local indent-line-function #'robot-mode-indent-line)
   (setq-local font-lock-defaults '(robot-mode-font-lock-keywords nil t))
   (setq-local comment-start "#")
+  (setq-local syntax-propertize-function #'robot-mode-syntax-propertize)
   (setq-local outline-regexp "^\\*\\*\\*\\|^\\sw"))
 
 ;;; robot-mode.el ends here
