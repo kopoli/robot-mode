@@ -166,7 +166,9 @@ Defuns are the steps of a keyword, test or task. This is used as
   (when (looking-at "^\\S-")
     (forward-char))
 
-  (re-search-forward "^\\S-" nil t)
+  (when (not (re-search-forward "^\\S-" nil t))
+    ;; If the last defun, go to the end of the buffer.
+    (goto-char (point-max)))
   (robot-mode--back-to-previous-line)
   (forward-line))
 
