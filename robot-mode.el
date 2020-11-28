@@ -185,7 +185,7 @@
   (indent-region (line-beginning-position) (line-end-position)))
 
 ;;;###autoload
-(add-to-list 'auto-mode-alist '("\\.\\(resource\\|robot\\)\\'" . robot-mode))
+(add-to-list 'auto-mode-alist '("\\.\\(robot\\|resource\\)\\'" . robot-mode))
 
 ;;;###autoload
 (define-derived-mode robot-mode prog-mode "Robot"
@@ -199,6 +199,8 @@
   (setq-local beginning-of-defun-function #'robot-mode-beginning-of-defun)
   (setq-local end-of-defun-function #'robot-mode-end-of-defun)
   (setq-local syntax-propertize-function #'robot-mode-syntax-propertize)
-  (setq-local outline-regexp "^\\*\\*\\*\\|^\\sw"))
+  (setq-local outline-regexp "^\\*\\|^\\sw"))
+
+(provide 'robot-mode)
 
 ;;; robot-mode.el ends here
