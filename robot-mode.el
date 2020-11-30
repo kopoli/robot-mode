@@ -153,7 +153,7 @@
   (funcall
    (syntax-propertize-rules
     ;; Single space between non-space characters is part of the symbol syntax
-    ("[^ ]\\( \\)[^ ]" (1 "_")))
+    ("[[:alnum:]]\\( \\)[[:alnum:]]" (1 "_")))
    start end))
 
 (defun robot-mode--back-to-previous-line ()
