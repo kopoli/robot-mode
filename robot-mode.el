@@ -297,6 +297,7 @@ Prefix the continuation with indentation, ellipsis and spacing."
   (setq-local indent-line-function #'robot-mode-indent-line)
   (setq-local font-lock-defaults '(robot-mode-font-lock-keywords nil t))
   (setq-local comment-start "#")
+  (setq-local comment-start-skip "#+ *")
   (setq-local beginning-of-defun-function #'robot-mode-beginning-of-defun)
   (setq-local end-of-defun-function #'robot-mode-end-of-defun)
   (setq-local syntax-propertize-function #'robot-mode-syntax-propertize)
