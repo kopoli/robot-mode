@@ -123,13 +123,14 @@
     ("^\\*.*" . font-lock-keyword-face)
     ("\\[\\sw+\\]" . font-lock-constant-face)
     ("\\.\\.\\." . font-lock-constant-face)
-    ("^\\(Library\\|Resource\\|Suite Setup\\|Suite Teardown\\):?\s-*\\(.*\\)"
-     (1 font-lock-preprocessor-face t) (2 font-lock-constant-face t))
-    ("^\\(Documentation\\|Tags\\|Metadata\\):?\s-*\\(.*\\)"
-     (1 font-lock-preprocessor-face t) (2 font-lock-string-face t))
-    ("[@$&%]{\\([0-9]+\\|true\\|false\\)}" . font-lock-constant-face)
+    ("^\\(Library\\|Resource\\|\\(Suite\\|Task\\|Test\\) \\(Setup\\|Teardown\\|Template\\|Timeout\\)\\|Variables\\):?\s-*\\(.*\\)"
+     (1 font-lock-preprocessor-face t) (4 font-lock-constant-face t))
+    ("^\\(Documentation\\|\\(Force \\|Default \\)Tags\\|Metadata\\):?\s-*\\(.*\\)"
+     (1 font-lock-preprocessor-face t) (3 font-lock-doc-face t))
+    ("[@$&%]{\\([+-]?\\(0[xbo]\\)?[0-9.a-f]+\\|true\\|false\\|None\\|null\\|EMPTY\\|SPACE\\)}" . font-lock-constant-face)
+    ("[$]{{[^}]*}}" . font-lock-builtin-face)
     ("[@$&%]{[^}]*}" . font-lock-variable-name-face)
-    ("^[^ \t].*" . font-lock-function-name-face))
+    ("^[[:alnum:]]+.*$" . font-lock-function-name-face))
   "Default `font-lock-keywords' for Robot mode.")
 
 (defvar robot-mode-syntax-table
