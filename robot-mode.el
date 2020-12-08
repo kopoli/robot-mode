@@ -159,7 +159,7 @@
 (defun robot-mode--back-to-previous-line ()
   "Move point to the previous non-empty line."
   (beginning-of-line)
-  (re-search-backward "^\\s-*[[:print:]]" nil t)
+  (re-search-backward "^\\s-*[[:graph:]]" nil t)
   (back-to-indentation))
 
 (defun robot-mode-indent-line ()
@@ -217,7 +217,7 @@ Used as `indent-line-function' of the mode."
 
 Defuns are the steps of a keyword, test or task. This is used as
 `beginning-of-defun-function' of the mode."
-  (re-search-backward "^\\S-" nil t))
+  (re-search-backward "^[[:graph:]]" nil t))
 
 (defun robot-mode-end-of-defun ()
   "Move the point to the end of the current defun.
