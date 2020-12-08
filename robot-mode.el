@@ -24,7 +24,7 @@
 ;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+;; along with GNU Emacs.  If not, see <https://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 
@@ -228,7 +228,7 @@ Defuns are the steps of a keyword, test or task. This is used as
   (when (looking-at "^\\S-")
     (forward-char))
 
-  (when (not (re-search-forward "^\\S-" nil t))
+  (unless (re-search-forward "^\\S-" nil t)
     ;; If the last defun, go to the end of the buffer.
     (goto-char (point-max)))
   (robot-mode--back-to-previous-line)
