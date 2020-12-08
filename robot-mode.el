@@ -224,15 +224,10 @@ Defuns are the steps of a keyword, test or task. This is used as
 
 Defuns are the steps of a keyword, test or task. This is used as
 `end-of-defun-function' of the mode."
-  ;; If at the beginning of the defun
-  (when (looking-at "^\\S-")
-    (forward-char))
-
-  (unless (re-search-forward "^\\S-" nil t)
-    ;; If the last defun, go to the end of the buffer.
-    (goto-char (point-max)))
-  (robot-mode--back-to-previous-line)
-  (forward-line))
+  (end-of-line)
+  (if (re-search-forward "^[[:graph:]]" nil t)
+      (beginning-of-line)
+    (goto-char (point-max))))
 
 (defun robot-mode-align (beg end)
   "Align the contents of the region between BEG and END."
