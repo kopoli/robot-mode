@@ -7,7 +7,7 @@
 ;; Created: 26 Nov 2020
 ;; Keywords: languages files
 ;; URL: https://github.com/kopoli/robot-mode
-;; Version: 0.6.0
+;; Version: 0.6.1
 ;; SPDX-License-Identifier: GPL-3.0-or-later
 ;; Package-Requires: ((emacs "26.1"))
 
