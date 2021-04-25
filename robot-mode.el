@@ -298,6 +298,11 @@ Prefix the continuation with indentation, ellipsis and spacing."
   (setq-local beginning-of-defun-function #'robot-mode-beginning-of-defun)
   (setq-local end-of-defun-function #'robot-mode-end-of-defun)
   (setq-local syntax-propertize-function #'robot-mode-syntax-propertize)
+  ;; Due to to the symbol syntax expanding to single space between non-space
+  ;; characters, broaden the whitespace definition of isearch to include
+  ;; literal spaces. This fixes the isearch-forward for strings containing
+  ;; spaces.
+  (setq-local search-whitespace-regexp "\\(\\s-\\| \\)+")
   (setq-local outline-regexp "^\\*\\|^\\sw"))
 
 ;;;###autoload
