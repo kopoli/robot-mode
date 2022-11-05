@@ -128,7 +128,8 @@
     ("^\\(Documentation\\|\\(Force \\|Default \\)Tags\\|Metadata\\):?\\s-*\\(.*\\)"
      (1 font-lock-preprocessor-face t) (3 font-lock-doc-face t))
     ("[@$&%]{\\([+-]?\\(0[xbo]\\)?[0-9.a-f]+\\|true\\|false\\|None\\|null\\|EMPTY\\|SPACE\\)}" . font-lock-constant-face)
-    ("[$]{{[^}]*}}" . font-lock-builtin-face)
+    ("\\([$]{{[^}]*}}\\)\\|^\\s-+\\(IF\\|ELSE IF\\|ELSE\\|END\\|FOR\\|WHILE\\|TRY\\|EXCEPT\\|RETURN\\|BREAK\\|CONTINUE\\)"
+     . font-lock-builtin-face)
     ("[@$&%]{[^}]*}" . font-lock-variable-name-face)
     ("^[[:alnum:]]+.*$" . font-lock-function-name-face))
   "Default `font-lock-keywords' for Robot mode.")
