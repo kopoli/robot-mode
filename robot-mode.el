@@ -123,9 +123,9 @@
     ("^\\*.*" . font-lock-keyword-face)
     ("\\[\\sw+\\]" . font-lock-constant-face)
     ("\\.\\.\\." . font-lock-constant-face)
-    ("^\\(Library\\|Resource\\|\\(Suite\\|Task\\|Test\\) \\(Setup\\|Teardown\\|Template\\|Timeout\\)\\|Variables\\):?\s-*\\(.*\\)"
+    ("^\\(Library\\|Resource\\|\\(Suite\\|Task\\|Test\\) \\(Setup\\|Teardown\\|Template\\|Timeout\\)\\|Variables\\):?\\s-*\\(.*\\)"
      (1 font-lock-preprocessor-face t) (4 font-lock-constant-face t))
-    ("^\\(Documentation\\|\\(Force \\|Default \\)Tags\\|Metadata\\):?\s-*\\(.*\\)"
+    ("^\\(Documentation\\|\\(Force \\|Default \\)Tags\\|Metadata\\):?\\s-*\\(.*\\)"
      (1 font-lock-preprocessor-face t) (3 font-lock-doc-face t))
     ("[@$&%]{\\([+-]?\\(0[xbo]\\)?[0-9.a-f]+\\|true\\|false\\|None\\|null\\|EMPTY\\|SPACE\\)}" . font-lock-constant-face)
     ("[$]{{[^}]*}}" . font-lock-builtin-face)
