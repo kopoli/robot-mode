@@ -5,6 +5,7 @@
 ---
 [![License GPLv3](https://img.shields.io/badge/license-GPL_v3-green.svg)](http://www.gnu.org/licenses/gpl-3.0.html)
 [![MELPA](http://melpa.org/packages/robot-mode-badge.svg)](http://melpa.org/#/robot-mode)
+[![MELPA Stable](http://stable.melpa.org/packages/robot-mode-badge.svg)](http://stable.melpa.org/#/robot-mode)
 
 ### Description
 
@@ -73,8 +74,25 @@ To:
 - Does NOT support the Pipe separated format or the reStructuredText
   format.
 
-### Function Documentation
+### Notable changes
 
+Version 0.7.0
+
+- Add control structure indentation (IF/WHILE/FOR/TRY etc.).
+
+
+
+### Customization Documentation
+
+#### `robot-mode-basic-offset`
+
+The amount of indentation for test and keyword steps.
+
+#### `robot-mode-argument-separator`
+
+The amount of spaces between different arguments to keywords.
+
+### Function and Macro Documentation
 
 #### `(robot-mode-syntax-propertize START END)`
 
@@ -83,20 +101,17 @@ Propertize text between START and END.
 #### `(robot-mode-indent-line)`
 
 Indent current line in Robot mode.
-
 Used as `indent-line-function` of the mode.
 
 #### `(robot-mode-beginning-of-defun)`
 
 Move the point to the beginning of the current defun.
-
 Defuns are the steps of a keyword, test or task. This is used as
 `beginning-of-defun-function` of the mode.
 
 #### `(robot-mode-end-of-defun)`
 
 Move the point to the end of the current defun.
-
 Defuns are the steps of a keyword, test or task. This is used as
 `end-of-defun-function` of the mode.
 
@@ -110,12 +125,11 @@ Align the contents current defun.
 
 #### `(robot-mode-align-region-or-defun)`
 
-Call `robot-mode-align` if region is active, otherwise call `robot-mode-align-defun`.
+Call `robot-mode-align` if region is active, otherwise `robot-mode-align-defun`.
 
 #### `(robot-mode-split-continuation)`
 
 Split current line at point and continue in the next line.
-
 Prefix the continuation with indentation, ellipsis and spacing.
 
 #### `(robot-mode-add-argument)`

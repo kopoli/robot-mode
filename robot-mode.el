@@ -7,7 +7,7 @@
 ;; Created: 26 Nov 2020
 ;; Keywords: languages files
 ;; URL: https://github.com/kopoli/robot-mode
-;; Version: 0.6.1
+;; Version: 0.7.0
 ;; SPDX-License-Identifier: GPL-3.0-or-later
 ;; Package-Requires: ((emacs "26.1"))
 
@@ -94,6 +94,12 @@
 ;;   https://robotframework.org/robotframework/latest/RobotFrameworkUserGuide.html#space-separated-format
 ;; - Does NOT support the Pipe separated format or the reStructuredText
 ;;   format.
+
+;; ### Notable changes
+
+;; Version 0.7.0
+
+;; - Add control structure indentation (IF/WHILE/FOR/TRY etc.).
 
 ;;; Code:
 
