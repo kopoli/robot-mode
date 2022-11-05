@@ -158,9 +158,9 @@
    start end))
 
 (defun robot-mode--back-to-previous-line ()
-  "Move point to the previous non-empty line."
+  "Move point to the previous non-empty, non-comment line."
   (beginning-of-line)
-  (re-search-backward "^\\s-*[[:graph:]]" nil t)
+  (re-search-backward "^\\s-*[^#[:space:][:cntrl:]]+" nil t)
   (back-to-indentation))
 
 (defun robot-mode-indent-line ()
@@ -174,44 +174,75 @@ Used as `indent-line-function' of the mode."
 	  (downcase (or (save-excursion
 			 (re-search-backward "^\\s-*\\*+\\s-*\\([a-zA-Z ]+\\)" nil t)
 			 (match-string-no-properties 1)) "")))
+
+	 ;; The non-indented contents of previous non-empty line
+	 previous-line
+
 	 ;; The amount of indent of previous non-empty line
 	 (previous-indent
 	  (save-excursion
 	    (robot-mode--back-to-previous-line)
-	    (- (point) (line-beginning-position)))))
+	    (setq previous-line (buffer-substring-no-properties
+				 (point) (line-end-position)))
+	    ;; Calculate the whitespace width, taking tabs into account.
+	    (string-width (buffer-substring-no-properties
+			   (line-beginning-position) (point)))))
 
-    (cond ((not (string-match "task.*\\|test case.*\\|keyword.*" section))
-	   ;; Indent only lines in the above sections
-	   (setq indent 0))
+	 ;; The non-indented contents of the current line
+	 current-line
 
-	  ;; Header line should not be indented
-	  ((save-excursion
-	     (back-to-indentation)
-	     (looking-at "\\*"))
-	   (setq indent 0))
+	 ;; The indentation level of the current line
+	 (current-indent
+	  (save-excursion
+	    (back-to-indentation)
+	    (setq current-line (buffer-substring-no-properties
+				(point) (line-end-position)))
+	    (string-width (buffer-substring-no-properties
+			   (line-beginning-position) (point))))))
 
-	  ;; Indent only lines that are inside keywords
-	  ((= previous-indent 0)
-	   (save-excursion
-	     (robot-mode--back-to-previous-line)
-	     (setq indent
-		   ;; If the previous line is not a header
-		   (cond ((not (looking-at "^\\*"))
-			  robot-mode-basic-offset)
-			 (t 0)))))
-	  (t
-	   ;; If previous line is indented, indent to that level
-	   (setq indent previous-indent)))
+    (setq indent
+	  (cond ((or
+		  ;; Don't indent if not in the below sections
+		  (not (string-match "task.*\\|test case.*\\|keyword.*" section))
+		  ;; Don't indent the section line
+		  (string-match "^\\*" current-line)
+		  ;; Don't indent the line after a section line
+		  (string-match "^\\*" previous-line))
+		 0)
+
+		;; If the current line contains an inline IF, don't increase indent
+		((string-match "^\\s-*IF\\s-\\{2,\\}[^[:space:]]+\\s-\\{2,\\}[^#[:space:]]" previous-line)
+		 previous-indent)
+
+		;; If previous line contains control structures, increase the
+		;; indentation level
+		((string-match "^\\s-*\\(IF\\|ELSE IF\\|ELSE\\|FOR\\|WHILE\\|TRY\\|EXCEPT\\)" previous-line)
+		 (+ previous-indent robot-mode-basic-offset))
+
+		;; Decrease indentation on control structures that end a block
+		((string-match"\\(END\\|ELSE IF\\|ELSE\\|EXCEPT\\)" current-line)
+		 (max robot-mode-basic-offset (- previous-indent robot-mode-basic-offset)))
+
+		;; If previous line is indented, indent to that level
+		((> previous-indent 0)
+		 previous-indent)
+
+		;; Otherwise indent to basic offset
+		(t
+		 robot-mode-basic-offset)))
 
     ;; Toggle indentation if the line is already indented
     (when (and (> indent 0)
-	       (= indent (- (point) (line-beginning-position))))
+	       (= indent current-indent))
       (setq indent 0))
 
-    ;; Do the actual indenting
+    ;; Always move back to indentation
     (back-to-indentation)
-    (delete-region (line-beginning-position)  (point))
-    (indent-to indent)))
+
+    ;; Do the actual indenting if indentation changed
+    (when (not (= indent current-indent))
+      (delete-region (line-beginning-position)  (point))
+      (indent-to indent))))
 
 (defun robot-mode-beginning-of-defun ()
   "Move the point to the beginning of the current defun.
