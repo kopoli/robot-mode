@@ -284,7 +284,7 @@ Defuns are the steps of a keyword, test or task. This is used as
     (robot-mode-align beg end)))
 
 (defun robot-mode-align-region-or-defun ()
-  "Call `robot-mode-align' if region is active, otherwise call `robot-mode-align-defun'."
+  "Call `robot-mode-align' if region is active, otherwise `robot-mode-align-defun'."
   (interactive)
   (if (region-active-p)
       (robot-mode-align (region-beginning) (region-end))
@@ -319,7 +319,7 @@ Prefix the continuation with indentation, ellipsis and spacing."
 
 ;;;###autoload
 (define-derived-mode robot-mode prog-mode "Robot"
-  "Major mode for editing Robot framework files
+  "Major mode for editing Robot framework files.
 
 \\{robot-mode-map}"
 
