@@ -104,6 +104,7 @@
 ;;; Code:
 
 (require 'align)
+(require 'robot-indent)
 
 (defgroup robot nil
   "Major mode for editing Robot Framework files."
@@ -134,7 +135,7 @@
     ("^\\(Documentation\\|\\(Force \\|Default \\)Tags\\|Metadata\\):?\\s-*\\(.*\\)"
      (1 font-lock-preprocessor-face t) (3 font-lock-doc-face t))
     ("[@$&%]{\\([+-]?\\(0[xbo]\\)?[0-9.a-f]+\\|true\\|false\\|None\\|null\\|EMPTY\\|SPACE\\)}" . font-lock-constant-face)
-    ("\\([$]{{[^}]*}}\\)\\|^\\s-+\\(IF\\|ELSE IF\\|ELSE\\|END\\|FOR\\|WHILE\\|TRY\\|EXCEPT\\|RETURN\\|BREAK\\|CONTINUE\\)"
+    ("\\([$]{{[^}]*}}\\)\\|^\\s-+\\(FINALLY\\|IF\\|ELSE IF\\|ELSE\\|END\\|FOR\\|WHILE\\|TRY\\|EXCEPT\\|RETURN\\|BREAK\\|CONTINUE\\)"
      . font-lock-builtin-face)
     ("[@$&%]{[^}]*}" . font-lock-variable-name-face)
     ("^[[:alnum:]]+.*$" . font-lock-function-name-face))
@@ -162,93 +163,6 @@
     ;; Single space between non-space characters is part of the symbol syntax
     ("[[:alnum:]]\\( \\)[[:alnum:]]" (1 "_")))
    start end))
-
-(defun robot-mode--back-to-previous-line ()
-  "Move point to the previous non-empty, non-comment line."
-  (beginning-of-line)
-  (re-search-backward "^\\s-*[^#[:space:][:cntrl:]]+" nil t)
-  (back-to-indentation))
-
-(defun robot-mode-indent-line ()
-  "Indent current line in Robot mode.
-
-Used as `indent-line-function' of the mode."
-  (interactive)
-  (let* ((indent 0)
-	 ;; Get the current section
-	 (section
-	  (downcase (or (save-excursion
-			 (re-search-backward "^\\s-*\\*+\\s-*\\([a-zA-Z ]+\\)" nil t)
-			 (match-string-no-properties 1)) "")))
-
-	 ;; The non-indented contents of previous non-empty line
-	 previous-line
-
-	 ;; The amount of indent of previous non-empty line
-	 (previous-indent
-	  (save-excursion
-	    (robot-mode--back-to-previous-line)
-	    (setq previous-line (buffer-substring-no-properties
-				 (point) (line-end-position)))
-	    ;; Calculate the whitespace width, taking tabs into account.
-	    (string-width (buffer-substring-no-properties
-			   (line-beginning-position) (point)))))
-
-	 ;; The non-indented contents of the current line
-	 current-line
-
-	 ;; The indentation level of the current line
-	 (current-indent
-	  (save-excursion
-	    (back-to-indentation)
-	    (setq current-line (buffer-substring-no-properties
-				(point) (line-end-position)))
-	    (string-width (buffer-substring-no-properties
-			   (line-beginning-position) (point))))))
-
-    (setq indent
-	  (cond ((or
-		  ;; Don't indent if not in the below sections
-		  (not (string-match "task.*\\|test case.*\\|keyword.*" section))
-		  ;; Don't indent the section line
-		  (string-match "^\\*" current-line)
-		  ;; Don't indent the line after a section line
-		  (string-match "^\\*" previous-line))
-		 0)
-
-		;; If the current line contains an inline IF, don't increase indent
-		((string-match "^\\s-*IF\\s-\\{2,\\}[^[:space:]]+\\s-\\{2,\\}[^#[:space:]]" previous-line)
-		 previous-indent)
-
-		;; If previous line contains control structures, increase the
-		;; indentation level
-		((string-match "^\\s-*\\(IF\\|ELSE IF\\|ELSE\\|FOR\\|WHILE\\|TRY\\|EXCEPT\\)" previous-line)
-		 (+ previous-indent robot-mode-basic-offset))
-
-		;; Decrease indentation on control structures that end a block
-		((string-match"\\(END\\|ELSE IF\\|ELSE\\|EXCEPT\\)" current-line)
-		 (max robot-mode-basic-offset (- previous-indent robot-mode-basic-offset)))
-
-		;; If previous line is indented, indent to that level
-		((> previous-indent 0)
-		 previous-indent)
-
-		;; Otherwise indent to basic offset
-		(t
-		 robot-mode-basic-offset)))
-
-    ;; Toggle indentation if the line is already indented
-    (when (and (> indent 0)
-	       (= indent current-indent))
-      (setq indent 0))
-
-    ;; Always move back to indentation
-    (back-to-indentation)
-
-    ;; Do the actual indenting if indentation changed
-    (when (not (= indent current-indent))
-      (delete-region (line-beginning-position)  (point))
-      (indent-to indent))))
 
 (defun robot-mode-beginning-of-defun ()
   "Move the point to the beginning of the current defun.
@@ -329,10 +243,14 @@ Prefix the continuation with indentation, ellipsis and spacing."
 
 \\{robot-mode-map}"
 
-  (setq-local indent-line-function #'robot-mode-indent-line)
+  (setq-local indent-line-function #'robot-indent-line-function)
   (setq-local font-lock-defaults '(robot-mode-font-lock-keywords nil t))
   (setq-local comment-start "#")
   (setq-local comment-start-skip "#+ *")
+
+  ;; Don't reindent automatically, because keyword and defun name are similar
+  (setq-local electric-indent-inhibit t)
+
   (setq-local beginning-of-defun-function #'robot-mode-beginning-of-defun)
   (setq-local end-of-defun-function #'robot-mode-end-of-defun)
   (setq-local syntax-propertize-function #'robot-mode-syntax-propertize)
