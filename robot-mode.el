@@ -113,7 +113,7 @@
   :link '(url-link :tag "Github" "https://github.com/kopoli/robot-mode")
   :link '(url-link :tag "Documentation" "https://robotframework.org/robotframework/latest/RobotFrameworkUserGuide.html"))
 
-(defcustom robot-mode-basic-offset standard-indent
+(defcustom robot-mode-indent-level standard-indent
   "The amount of indentation for test and keyword steps."
   :type 'integer
   :group 'robot
@@ -150,6 +150,8 @@
 
 (defvar robot-mode-map
   (let ((map (make-sparse-keymap)))
+    (define-key map "\177" 'robot-indent-dedent-line-backspace)
+    (define-key map (kbd "<backtab>") 'robot-indent-dedent-line)
     (define-key map (kbd "C-c C-a") #'robot-mode-align-region-or-defun)
     (define-key map (kbd "C-c C-j") #'robot-mode-split-continuation)
     (define-key map (kbd "C-c C-SPC") #'robot-mode-add-argument)

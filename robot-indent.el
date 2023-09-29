@@ -24,9 +24,6 @@
 
 ;;; Code:
 
-(require 'robot-utils)
-
-
 (defvar robot-defun-regexp "^[[:alnum:]]+.*$"
   "Regexp matching the line that define a keyword or a test case")
 
@@ -63,18 +60,53 @@
   (rx line-start (+ (or space "\t")) "END" (* (or space "\t")) line-end)
   "Regexp Matching end of block")
 
-(defun robot-indent--check-line (regexp &optional num)
-  "Check if the current line match the regexp.
-Use `num' to check previous or next lines as `forward-line' argument"
-  (save-excursion
-    (forward-line (or num 0))
-    (when num
-      (while (or (looking-at "[[:space:]]*\\(#.*\\)*$") (bobp)) ;; skip empty or comments lines
-        (forward-line (or num -1))))
-    (string-match
-     regexp (buffer-substring (line-beginning-position) (line-end-position)))))
+(defun robot-indent-line-function ()
+  "`indent-line-function' for Gdscript mode.
+When the variable `last-command' is equal to `indent-for-tab-command'
+it cycles possible indentation levels from right to left."
+  (robot-indent-line
+   (and (equal this-command 'indent-for-tab-command)
+        (eq last-command this-command))))
 
-(defun robot-indent-context ()
+(defun robot-indent-line (&optional previous)
+  "Internal implementation of `robot-indent-line-function'.
+Use the PREVIOUS level when argument is non-nil, otherwise indent
+to the maximum available level.  When indentation is the minimum
+possible and PREVIOUS is non-nil, cycle back to the maximum
+level."
+  (let ((follow-indentation-p
+         ;; Check if point is within indentation.
+         (and (<= (line-beginning-position) (point))
+              (>= (+ (line-beginning-position)
+                     (current-indentation))
+                  (point)))))
+    (save-excursion
+      (indent-line-to
+       (robot-indent--calculate-indentation previous)))
+    (when follow-indentation-p
+      (back-to-indentation))))
+
+(defun robot-indent-dedent-line ()
+  "De-indent current line."
+  (interactive "*")
+  (when (and (not (bolp))
+             (= (current-indentation) (current-column)))
+    (let* ((ril robot-mode-indent-level)
+           (previous-column (* ril (1- (/ (current-column) ril )))))
+      (while (and (not (bolp))
+              (> (current-column) previous-column))
+        (delete-char -1)))
+    t))
+
+(defun robot-indent-dedent-line-backspace (arg)
+  "De-indent current line.
+Argument ARG is passed to `backward-delete-char-untabify' when
+point is not in between the indentation."
+  (interactive "*p")
+  (unless (robot-indent-dedent-line)
+    (backward-delete-char-untabify arg)))
+
+(defun robot-indent--get-context ()
   "Get information about the current indentation context.
 Context is returned in a cons with the form (STATUS . START).
 
@@ -113,7 +145,7 @@ keyword
  - Point is on a line starting a dedenter block.
  - START is the position where the previous line starts."
 
-  (let ((current-header (robot-utils-current-header-block))
+  (let ((current-header (robot-indent--get-current-header-block))
         (previous-line-start (save-excursion
                                (back-to-indentation)
                                (skip-chars-backward " \t\n")
@@ -160,11 +192,11 @@ keyword
           (cons :after-line (point))))))))
 
 (defun robot-indent--calculate-indentations ()
-  "Internal implementation of `robot-indent-calculate-indentation'.
+  "Internal implementation of `robot-indent--calculate-indentation'.
 Return the list of possible indentations based on context.
 Note that it return a list only on the after-line context"
   (save-excursion
-    (pcase (robot-indent-context)
+    (pcase (robot-indent--get-context)
       (`(,(or :no-indent
               :at-header
               :in-variables-block
@@ -173,7 +205,7 @@ Note that it return a list only on the after-line context"
               :after-block-start)
          . ,start)
        (goto-char start)
-       (+ (current-indentation) robot-mode-basic-offset))
+       (+ (current-indentation) robot-mode-indent-level))
       (`(,(or :at-special-keyword
               :at-continuing-line
               :at-block-start)
@@ -189,9 +221,9 @@ Note that it return a list only on the after-line context"
               :at-dedenter-block)
          . ,start)
        (goto-char start)
-       (- (current-indentation) robot-mode-basic-offset)))))
+       (- (current-indentation) robot-mode-indent-level)))))
 
-(defun robot-indent-calculate-indentation (&optional previous)
+(defun robot-indent--calculate-indentation (&optional previous)
   "Calculate indentation.
 Get indentation of PREVIOUS level when argument is non-nil.
 Return the max level of the cycle when indentation reaches the
@@ -215,63 +247,22 @@ minimum."
           (throw 'return i)))
       default)))
 
-(defun robot-indent-line (&optional previous)
-  "Internal implementation of `robot-indent-line-function'.
-Use the PREVIOUS level when argument is non-nil, otherwise indent
-to the maximum available level.  When indentation is the minimum
-possible and PREVIOUS is non-nil, cycle back to the maximum
-level."
-  (let ((follow-indentation-p
-         ;; Check if point is within indentation.
-         (and (<= (line-beginning-position) (point))
-              (>= (+ (line-beginning-position)
-                     (current-indentation))
-                  (point)))))
-    (save-excursion
-      (indent-line-to
-       (robot-indent-calculate-indentation previous)))
-    (when follow-indentation-p
-      (back-to-indentation))))
+(defun robot-indent--get-current-header-block ()
+  "Get the current header-block name"
+  (save-excursion
+    (re-search-backward "[*][*][*]  *\\([^*]+\\)  *[*][*][*]" nil t)
+    (match-string 1)))
 
-(defun robot-indent-line-function ()
-  "`indent-line-function' for Gdscript mode.
-When the variable `last-command' is equal to `indent-for-tab-command'
-it cycles possible indentation levels from right to left."
-  (robot-indent-line
-   (and (equal this-command 'indent-for-tab-command)
-        (eq last-command this-command))))
-
-(defun robot-indent-skip-arguments-spaces ()
-  "Delete all arguments spaces until reaching the keyword or the previous column"
-  (interactive "*")
-  (let ((previous-column
-         (or (car (last (seq-filter (lambda (e) (> (current-column) e))
-                                    (mapcar 'car (or (robot-utils-get-line-alignment -1)
-                                                     (robot-utils-get-line-alignment 1))))))
-             0)))
-    (when (and (not (bolp))
-               (looking-back (format " \\{%d\\}" robot-mode-argument-separator)))
-      (while (and (> (current-column) previous-column)
-                 (looking-back " "))
-        (delete-char -1))
-      t)))
-
-(defun robot-indent-dedent-line ()
-  "De-indent current line."
-  (interactive "*")
-  (when (and (not (bolp))
-             (= (current-indentation) (current-column)))
-    (robot-indent-line t)
-    t))
-
-(defun robot-indent-dedent-line-backspace (arg)
-  "De-indent current line.
-Argument ARG is passed to `backward-delete-char-untabify' when
-point is not in between the indentation."
-  (interactive "*p")
-  (unless (or (robot-indent-skip-arguments-spaces)
-              (robot-indent-dedent-line))
-    (backward-delete-char-untabify arg)))
+(defun robot-indent--check-line (regexp &optional num)
+  "Check if the current line match the regexp.
+Use `num' to check previous or next lines as `forward-line' argument"
+  (save-excursion
+    (forward-line (or num 0))
+    (when num
+      (while (or (looking-at "[[:space:]]*\\(#.*\\)*$") (bobp)) ;; skip empty or comments lines
+        (forward-line (or num -1))))
+    (string-match
+     regexp (buffer-substring (line-beginning-position) (line-end-position)))))
 
 
 (provide 'robot-indent)
