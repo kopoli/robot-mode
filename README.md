@@ -98,7 +98,7 @@ The amount of spaces between different arguments to keywords.
 
 Propertize text between START and END.
 
-#### `(robot-mode-indent-line)`
+#### `(robot-indent-line-function)`
 
 Indent current line in Robot mode.
 Used as `indent-line-function` of the mode.
