@@ -124,6 +124,13 @@
   :group 'robot
   :safe 'integerp)
 
+(defcustom robot-mode-retain-point-on-indent nil
+  "If the `point' position is after the indentation, retain it when
+indenting a line. Otherwise move `point' always `back-to-indentation'."
+  :type 'boolean
+  :group 'robot
+  :safe 'booleanp)
+
 (defvar robot-mode-font-lock-keywords
   '(("#.*" . font-lock-comment-face)
     ("^\\*.*" . font-lock-keyword-face)
@@ -242,13 +249,15 @@ Used as `indent-line-function' of the mode."
 	       (= indent current-indent))
       (setq indent 0))
 
-    ;; Always move back to indentation
-    (back-to-indentation)
+    (when (not robot-mode-retain-point-on-indent)
+      (back-to-indentation))
 
-    ;; Do the actual indenting if indentation changed
-    (when (not (= indent current-indent))
-      (delete-region (line-beginning-position)  (point))
-      (indent-to indent))))
+    ;; Save point if point retention is enabled and point is after indentation
+    (if (and (> (current-column) current-indent)
+	     robot-mode-retain-point-on-indent)
+	(save-excursion
+	  (indent-line-to indent))
+      (indent-line-to indent))))
 
 (defun robot-mode-beginning-of-defun ()
   "Move the point to the beginning of the current defun.
