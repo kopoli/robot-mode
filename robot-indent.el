@@ -135,7 +135,6 @@ STATUS can be one of the following, the order gives the assignment priority:
                                (beginning-of-line)
                                (point))))
     (cond
-
      ((or (= (line-number-at-pos) 1) ;; Beginning of buffer.
           (robot-indent--check-line robot-header-regexp)
           (string-equal-ignore-case current-header "variables")
