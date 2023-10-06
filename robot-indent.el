@@ -20,7 +20,7 @@
 
 ;;; Commentary:
 
-;; Heavily inspired by gdscript mode indent functions which are based on python mode ones
+;; Heavily inspired by how gdscript mode handle indent which is also taken from python.el
 
 ;;; Code:
 
