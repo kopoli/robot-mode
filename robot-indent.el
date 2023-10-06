@@ -44,20 +44,20 @@
       (or "TRY"
        (and
          (or "WHILE" "IF" "FOR")
-         (or (>= 2 " ") "\t") (* ascii)))
+         (or (>= 2 " ") "\t") (* not-newline)))
       line-end)
   "Regexp Matching end of block")
 
 (defvar robot-dedenter-block-regex
   (rx line-start
       (* (or space "\t"))
-      (or (or "FINALLY" "ELSE") (and (or "EXCEPT" "ELSE IF") (+ (or space "\t")) (* ascii)))
-      (* (or space "\t"))
+      (or (or "FINALLY" "ELSE") (and (or "EXCEPT" "ELSE IF") (+ (or space "\t")) (+ ascii)))
+      (* not-newline)
       line-end)
   "Regexp Matching dedenter of block")
 
 (defvar robot-block-end-regex
-  (rx line-start (+ (or space "\t")) "END" (* (or space "\t")) line-end)
+  (rx line-start (+ (or space "\t")) "END" (* not-newline) line-end)
   "Regexp Matching end of block")
 
 (defun robot-indent-line-function ()
@@ -110,41 +110,24 @@ point is not in between the indentation."
   "Get information about the current indentation context.
 Context is returned in a cons with the form (STATUS . START).
 
-STATUS can be one of the following:
-
-keyword
--------
+STATUS can be one of the following, the order gives the assignment priority:
 
 :no-indent
  - When in Settings or Variables headers
-:at-header (no-indent)
- - When point in a header
-:in-settings-block (no-indent)
- - When point inside the settings block
-:in-variables-block (no-indent)
- - When point inside the settings block
-
 :after-defun
  - Point is after a keyword or test case defun
-:at-special-keyword
- - Point is in a line that define a special keyword (with square brackets) or ...
- - START is the position of the previous line indentation
-:at-block-end
- - Point is at line starting a block starter
- - START is the position of the previous line indentation
-:at-block-end
- - Point is at line starting a block ender
- - START is the position of the previous line indentation
 :after-block-start
  - Point is after a line starting a block.
- - START is the position where the block starts.
+:at-special-keyword
+ - Point is in a line that define a special keyword (with square brackets) or ...
+:at-block-start
+ - Point is at line starting a block starter
+:at-block-end
+ - Point is at line starting a block ender
 :after-line
  - Point is after a simple line.
- - START is the position where the previous line starts.
 :at-dedenter-block
- - Point is on a line starting a dedenter block.
- - START is the position where the previous line starts."
-
+ - Point is on a line starting a dedenter block."
   (let ((current-header (robot-indent--get-current-header-block))
         (previous-line-start (save-excursion
                                (back-to-indentation)
@@ -152,15 +135,12 @@ keyword
                                (beginning-of-line)
                                (point))))
     (cond
-     ;; Beginning of buffer.
-     ((= (line-number-at-pos) 1)
+
+     ((or (= (line-number-at-pos) 1) ;; Beginning of buffer.
+          (robot-indent--check-line robot-header-regexp)
+          (string-equal-ignore-case current-header "variables")
+          (string-equal-ignore-case current-header "settings"))
       (cons :no-indent 0))
-     ((robot-indent--check-line robot-header-regexp)
-      (cons :at-header 0))
-     ((string-equal-ignore-case current-header "variables")
-      (cons :in-variables-block 0))
-     ((string-equal-ignore-case current-header "settings")
-      (cons :in-settings-block 0))
      ;; After defun, Keyword or Test Case
      ((robot-indent--check-line robot-defun-regexp -1)
       (cons :after-defun previous-line-start))
@@ -197,17 +177,13 @@ Return the list of possible indentations based on context.
 Note that it return a list only on the after-line context"
   (save-excursion
     (pcase (robot-indent--get-context)
-      (`(,(or :no-indent
-              :at-header
-              :in-variables-block
-              :in-settings-block) . ,_) (prog-first-column)) ; usually 0
+      (`(:no-indent . ,_) (prog-first-column)) ; usually 0
       (`(,(or :after-defun ;; Add one indentation level
               :after-block-start)
          . ,start)
        (goto-char start)
        (+ (current-indentation) robot-mode-indent-level))
       (`(,(or :at-special-keyword
-              :at-continuing-line
               :at-block-start)
          . ,start)
        ;; Copy previous indentation
