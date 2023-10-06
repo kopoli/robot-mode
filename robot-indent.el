@@ -234,7 +234,8 @@ Use `num' to check previous or next lines as `forward-line' argument"
   (save-excursion
     (forward-line (or num 0))
     (when num
-      (while (or (looking-at "[[:space:]]*\\(#.*\\)*$") (bobp)) ;; skip empty or comments lines
+      (while (and (looking-at "[[:space:]]*\\(#.*\\)*$")
+                 (not (bobp)) (not (eobp))) ;; skip empty or comments lines
         (forward-line (or num -1))))
     (string-match
      regexp (buffer-substring (line-beginning-position) (line-end-position)))))
