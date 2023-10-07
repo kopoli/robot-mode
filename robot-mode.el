@@ -330,6 +330,7 @@ Prefix the continuation with indentation, ellipsis and spacing."
 \\{robot-mode-map}"
 
   (setq-local indent-line-function #'robot-mode-indent-line)
+  (setq-local electric-indent-inhibit t)
   (setq-local font-lock-defaults '(robot-mode-font-lock-keywords nil t))
   (setq-local comment-start "#")
   (setq-local comment-start-skip "#+ *")
