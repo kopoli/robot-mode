@@ -170,6 +170,9 @@ indenting a line. Otherwise move `point' always `back-to-indentation'."
     ("[[:alnum:]]\\( \\)[[:alnum:]]" (1 "_")))
    start end))
 
+(defvar robot-mode-indent-toggle t
+  "Should the indentation be removed when already indented.")
+
 (defun robot-mode--back-to-previous-line ()
   "Move point to the previous non-empty, non-comment line."
   (beginning-of-line)
@@ -245,7 +248,8 @@ Used as `indent-line-function' of the mode."
 		 robot-mode-basic-offset)))
 
     ;; Toggle indentation if the line is already indented
-    (when (and (> indent 0)
+    (when (and robot-mode-indent-toggle
+	       (> indent 0)
 	       (= indent current-indent))
       (setq indent 0))
 
@@ -284,7 +288,8 @@ Defuns are the steps of a keyword, test or task. This is used as
   ;; Align only with spaces
   (let ((align-to-tab-stop nil))
     (align-regexp beg end "\\(\\s-\\s-+\\)"  1 robot-mode-argument-separator t))
-  (indent-region beg end))
+  (let ((robot-mode-indent-toggle nil))
+    (indent-region beg end)))
 
 (defun robot-mode-align-defun ()
   "Align the contents current defun."
