@@ -247,7 +247,14 @@ Used as `indent-line-function' of the mode."
     ;; Toggle indentation if the line is already indented
     (when (and robot-mode-indent-toggle
 	       (> indent 0)
-	       (= indent current-indent))
+	       (= indent current-indent)
+	       ;; Prevent toggling if point is retained, TAB also does
+	       ;; completion, point is after indentation and previous command
+	       ;; was also an indentation.
+	       (not (and robot-mode-retain-point-on-indent
+			 (eq tab-always-indent 'complete)
+			 (> (current-column) current-indent)
+			 (equal this-command last-command))))
       (setq indent 0))
 
     (when (not robot-mode-retain-point-on-indent)
