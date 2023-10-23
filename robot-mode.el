@@ -200,9 +200,7 @@ Used as `indent-line-function' of the mode."
 	    (robot-mode--back-to-previous-line)
 	    (setq previous-line (buffer-substring-no-properties
 				 (point) (line-end-position)))
-	    ;; Calculate the whitespace width, taking tabs into account.
-	    (string-width (buffer-substring-no-properties
-			   (line-beginning-position) (point)))))
+	    (current-indentation)))
 
 	 ;; The non-indented contents of the current line
 	 current-line
@@ -213,8 +211,7 @@ Used as `indent-line-function' of the mode."
 	    (back-to-indentation)
 	    (setq current-line (buffer-substring-no-properties
 				(point) (line-end-position)))
-	    (string-width (buffer-substring-no-properties
-			   (line-beginning-position) (point))))))
+	    (current-indentation))))
 
     (setq indent
 	  (cond ((or
