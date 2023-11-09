@@ -229,7 +229,7 @@ Used as `indent-line-function' of the mode."
 
 		;; If previous line contains control structures, increase the
 		;; indentation level
-		((string-match "^\\s-*\\(IF\\|ELSE IF\\|ELSE\\|FOR\\|WHILE\\|TRY\\|EXCEPT\\)" previous-line)
+		((string-match "^\\s-*\\(IF\\|ELSE IF\\|ELSE\\|FOR\\|WHILE\\|TRY\\|EXCEPT\\)\\(\\s-\\{2,\\}.*\\|\\s-*$\\)" previous-line)
 		 (+ previous-indent robot-mode-basic-offset))
 
 		;; Decrease indentation on control structures that end a block
