@@ -132,18 +132,17 @@ indenting a line. Otherwise move `point' always `back-to-indentation'."
   :safe 'booleanp)
 
 (defvar robot-mode-font-lock-keywords
-  '(("#.*" . font-lock-comment-face)
-    ("^\\*.*" . font-lock-keyword-face)
+  '(("^\\*.*" . font-lock-keyword-face)
     ("\\[\\sw+\\]" . font-lock-constant-face)
     ("\\.\\.\\." . font-lock-constant-face)
-    ("^\\(Library\\|Resource\\|\\(Suite\\|Task\\|Test\\) \\(Setup\\|Teardown\\|Template\\|Timeout\\)\\|Variables\\):?\\s-*\\(.*\\)"
-     (1 font-lock-preprocessor-face t) (4 font-lock-constant-face t))
-    ("^\\(Documentation\\|\\(Force \\|Default \\)Tags\\|Metadata\\):?\\s-*\\(.*\\)"
-     (1 font-lock-preprocessor-face t) (3 font-lock-doc-face t))
-    ("[@$&%]{\\([+-]?\\(0[xbo]\\)?[0-9.a-f]+\\|true\\|false\\|None\\|null\\|EMPTY\\|SPACE\\)}" . font-lock-constant-face)
-    ("\\([$]{{[^}]*}}\\)\\|^\\s-+\\(IF\\|ELSE IF\\|ELSE\\|END\\|FOR\\|WHILE\\|TRY\\|EXCEPT\\|RETURN\\|BREAK\\|CONTINUE\\)"
-     . font-lock-builtin-face)
     ("[@$&%]{[^}]*}" . font-lock-variable-name-face)
+    ("^\\(Library\\|Resource\\|\\(Suite\\|Task\\|Test\\) \\(Setup\\|Teardown\\|Template\\|Timeout\\)\\|Variables\\):?\\s-*\\(.*?\\)\\(\\s-\\{2,\\}\\|$\\)"
+     (1 font-lock-preprocessor-face) (4 font-lock-constant-face append))
+    ("^\\(Documentation\\|\\(Force \\|Default \\)Tags\\|Metadata\\):?\\s-*\\(.*\\)"
+     (1 font-lock-preprocessor-face) (3 font-lock-doc-face))
+    ("[@$&%]{\\([+-]?\\(0[xbo]\\)?[0-9.a-f]+\\|true\\|false\\|None\\|null\\|EMPTY\\|SPACE\\)}" . font-lock-constant-face)
+    ("\\([$]{{[^}]*}}\\)\\|^\\s-+\\(IF\\|ELSE IF\\|ELSE\\|END\\|FOR\\|WHILE\\|TRY\\|EXCEPT\\|RETURN\\|BREAK\\|CONTINUE\\)\\(\\s-\\{2,\\}\\|$\\)"
+     . font-lock-builtin-face)
     ("^[[:alnum:]]+.*$" . font-lock-function-name-face))
   "Default `font-lock-keywords' for Robot mode.")
 
