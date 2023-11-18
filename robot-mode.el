@@ -124,6 +124,13 @@
   :group 'robot
   :safe 'integerp)
 
+(defcustom robot-mode-retain-point-on-indent nil
+  "If the `point' position is after the indentation, retain it when
+indenting a line. Otherwise move `point' always `back-to-indentation'."
+  :type 'boolean
+  :group 'robot
+  :safe 'booleanp)
+
 (defvar robot-mode-font-lock-keywords
   '(("#.*" . font-lock-comment-face)
     ("^\\*.*" . font-lock-keyword-face)
@@ -163,6 +170,9 @@
     ("[[:alnum:]]\\( \\)[[:alnum:]]" (1 "_")))
    start end))
 
+(defvar robot-mode-indent-toggle t
+  "Should the indentation be removed when already indented.")
+
 (defun robot-mode--back-to-previous-line ()
   "Move point to the previous non-empty, non-comment line."
   (beginning-of-line)
@@ -190,9 +200,7 @@ Used as `indent-line-function' of the mode."
 	    (robot-mode--back-to-previous-line)
 	    (setq previous-line (buffer-substring-no-properties
 				 (point) (line-end-position)))
-	    ;; Calculate the whitespace width, taking tabs into account.
-	    (string-width (buffer-substring-no-properties
-			   (line-beginning-position) (point)))))
+	    (current-indentation)))
 
 	 ;; The non-indented contents of the current line
 	 current-line
@@ -203,8 +211,7 @@ Used as `indent-line-function' of the mode."
 	    (back-to-indentation)
 	    (setq current-line (buffer-substring-no-properties
 				(point) (line-end-position)))
-	    (string-width (buffer-substring-no-properties
-			   (line-beginning-position) (point))))))
+	    (current-indentation))))
 
     (setq indent
 	  (cond ((or
@@ -222,7 +229,7 @@ Used as `indent-line-function' of the mode."
 
 		;; If previous line contains control structures, increase the
 		;; indentation level
-		((string-match "^\\s-*\\(IF\\|ELSE IF\\|ELSE\\|FOR\\|WHILE\\|TRY\\|EXCEPT\\)" previous-line)
+		((string-match "^\\s-*\\(IF\\|ELSE IF\\|ELSE\\|FOR\\|WHILE\\|TRY\\|EXCEPT\\)\\(\\s-\\{2,\\}.*\\|\\s-*$\\)" previous-line)
 		 (+ previous-indent robot-mode-basic-offset))
 
 		;; Decrease indentation on control structures that end a block
@@ -238,17 +245,27 @@ Used as `indent-line-function' of the mode."
 		 robot-mode-basic-offset)))
 
     ;; Toggle indentation if the line is already indented
-    (when (and (> indent 0)
-	       (= indent current-indent))
+    (when (and robot-mode-indent-toggle
+	       (> indent 0)
+	       (= indent current-indent)
+	       ;; Prevent toggling if point is retained, TAB also does
+	       ;; completion, point is after indentation and previous command
+	       ;; was also an indentation.
+	       (not (and robot-mode-retain-point-on-indent
+			 (eq tab-always-indent 'complete)
+			 (> (current-column) current-indent)
+			 (equal this-command last-command))))
       (setq indent 0))
 
-    ;; Always move back to indentation
-    (back-to-indentation)
+    (when (not robot-mode-retain-point-on-indent)
+      (back-to-indentation))
 
-    ;; Do the actual indenting if indentation changed
-    (when (not (= indent current-indent))
-      (delete-region (line-beginning-position)  (point))
-      (indent-to indent))))
+    ;; Save point if point retention is enabled and point is after indentation
+    (if (and (> (current-column) current-indent)
+	     robot-mode-retain-point-on-indent)
+	(save-excursion
+	  (indent-line-to indent))
+      (indent-line-to indent))))
 
 (defun robot-mode-beginning-of-defun ()
   "Move the point to the beginning of the current defun.
@@ -275,7 +292,8 @@ Defuns are the steps of a keyword, test or task. This is used as
   ;; Align only with spaces
   (let ((align-to-tab-stop nil))
     (align-regexp beg end "\\(\\s-\\s-+\\)"  1 robot-mode-argument-separator t))
-  (indent-region beg end))
+  (let ((robot-mode-indent-toggle nil))
+    (indent-region beg end)))
 
 (defun robot-mode-align-defun ()
   "Align the contents current defun."
@@ -330,6 +348,7 @@ Prefix the continuation with indentation, ellipsis and spacing."
 \\{robot-mode-map}"
 
   (setq-local indent-line-function #'robot-mode-indent-line)
+  (setq-local electric-indent-inhibit t)
   (setq-local font-lock-defaults '(robot-mode-font-lock-keywords nil t))
   (setq-local comment-start "#")
   (setq-local comment-start-skip "#+ *")
