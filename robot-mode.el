@@ -141,7 +141,7 @@ indenting a line. Otherwise move `point' always `back-to-indentation'."
     ("^\\(Documentation\\|\\(Force \\|Default \\)Tags\\|Metadata\\):?\\s-*\\(.*\\)"
      (1 font-lock-preprocessor-face) (3 font-lock-doc-face))
     ("[@$&%]{\\([+-]?\\(0[xbo]\\)?[0-9.a-f]+\\|true\\|false\\|None\\|null\\|EMPTY\\|SPACE\\)}" . font-lock-constant-face)
-    ("\\([$]{{[^}]*}}\\)\\|^\\s-+\\(IF\\|ELSE IF\\|ELSE\\|END\\|FOR\\|WHILE\\|TRY\\|EXCEPT\\|RETURN\\|BREAK\\|CONTINUE\\)\\(\\s-\\{2,\\}\\|$\\)"
+    ("\\([$]{{[^}]*}}\\)\\|^\\s-+\\(IF\\|ELSE IF\\|ELSE\\|END\\|FOR\\|WHILE\\|TRY\\|EXCEPT\\|RETURN\\|BREAK\\|CONTINUE\\|FINALLY\\)\\(\\s-\\{2,\\}\\|$\\)"
      . font-lock-builtin-face)
     ("^[[:alnum:]]+.*$" . font-lock-function-name-face))
   "Default `font-lock-keywords' for Robot mode.")
@@ -228,11 +228,11 @@ Used as `indent-line-function' of the mode."
 
 		;; If previous line contains control structures, increase the
 		;; indentation level
-		((string-match "^\\s-*\\(IF\\|ELSE IF\\|ELSE\\|FOR\\|WHILE\\|TRY\\|EXCEPT\\)\\(\\s-\\{2,\\}.*\\|\\s-*$\\)" previous-line)
+		((string-match "^\\s-*\\(IF\\|ELSE IF\\|ELSE\\|FOR\\|WHILE\\|TRY\\|EXCEPT\\|FINALLY\\)\\(\\s-\\{2,\\}.*\\|\\s-*$\\)" previous-line)
 		 (+ previous-indent robot-mode-basic-offset))
 
 		;; Decrease indentation on control structures that end a block
-		((string-match"\\(END\\|ELSE IF\\|ELSE\\|EXCEPT\\)" current-line)
+		((string-match"\\(END\\|ELSE IF\\|ELSE\\|EXCEPT\\|FINALLY\\)" current-line)
 		 (max robot-mode-basic-offset (- previous-indent robot-mode-basic-offset)))
 
 		;; If previous line is indented, indent to that level
