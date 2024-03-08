@@ -149,7 +149,7 @@ indenting a line. Otherwise move `point' always `back-to-indentation'."
 (defvar robot-mode-font-lock-keywords
   '(("^\\*.*" . font-lock-keyword-face)
     ("\\[\\sw+\\]" . font-lock-constant-face)
-    ("\\.\\.\\." . font-lock-constant-face)
+    ("^\\s-*\\(\\.\\.\\.\\)" . (1 font-lock-constant-face))
     ("[@$&%]{[^}]*}" . font-lock-variable-name-face)
     ("^\\(Library\\|Resource\\|\\(Suite\\|Task\\|Test\\) \\(Setup\\|Teardown\\|Template\\|Timeout\\)\\|Variables\\):?\\s-*\\(.*?\\)\\(\\s-\\{2,\\}\\|$\\)"
      (1 font-lock-preprocessor-face) (4 font-lock-constant-face append))
