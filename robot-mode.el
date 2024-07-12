@@ -161,6 +161,29 @@ indenting a line. Otherwise move `point' always `back-to-indentation'."
     ("^[[:alnum:]]+.*$" . font-lock-function-name-face))
   "Default `font-lock-keywords' for Robot mode.")
 
+(defvar robot-mode-imenu-generic-expression
+  ;; Keywords or test cases are any string beginning from the first column in
+  ;; the keywords or test cases sections.
+  '((nil  (lambda ()
+	    (let ((section
+		   (save-excursion
+		     (goto-char (point-min))
+		     (let ((case-fold-search t))
+		       (if (re-search-forward "^\\*[*\s-]*\\(Keywords\\|Test Cases\\)" nil t)
+			   (point)
+			 -1)))))
+
+	      ;; When a section is found
+	      (message "Section here %d match-data %s" section (match-data))
+	      (when (> section -1)
+		;; Check that the keywords are after the section marker
+		(if (and (re-search-backward "^\\([[:alnum:]]+.*\\)" nil t)
+			 (< section (point)))
+		    t
+		  (set-match-data nil)))))
+	  1))
+  "Imenu matchers for Robot mode.")
+
 (defvar robot-mode-syntax-table
   (with-syntax-table (make-syntax-table)
     (modify-syntax-entry ?# "<")
@@ -375,6 +398,7 @@ Prefix the continuation with indentation, ellipsis and spacing."
   ;; literal spaces. This fixes the isearch-forward for strings containing
   ;; spaces.
   (setq-local search-whitespace-regexp "\\(\\s-\\| \\)+")
+  (setq-local imenu-generic-expression robot-mode-imenu-generic-expression)
   (setq-local outline-regexp "^\\*\\|^\\sw"))
 
 ;;;###autoload

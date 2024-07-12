@@ -42,4 +42,7 @@
 (ert-deftest robot-mode-test--operation ()
   (ert-test-erts-file (ert-resource-file "robot-mode-test-operation.erts")))
 
+(ert-deftest robot-mode-test--imenu ()
+  (ert-test-erts-file (ert-resource-file "robot-mode-test-imenu.erts")))
+
 ;;; robot-mode-test.el ends here

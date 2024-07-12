@@ -1,0 +1,78 @@
+Name: Imenu - Empty
+Point-Char: |
+Code: (lambda () (robot-mode) (require 'imenu)
+        (insert (mapconcat (lambda (x) (car x)) (ignore-errors (imenu--make-index-alist)) ", ")))
+=-=
+|
+=-=
+|
+=-=-=
+
+Name: Imenu - No matches
+=-=
+This should not be included
+
+*** Test Cases ***
+|
+=-=
+This should not be included
+
+*** Test Cases ***
+|
+=-=-=
+
+Name: Imenu - Test cases
+=-=
+This should not be included
+
+*** Test Cases ***
+My Test
+    My Keyword    ${CURDIR}  ...
+
+Another Test
+    My Keyword
+|
+=-=
+This should not be included
+
+*** Test Cases ***
+My Test
+    My Keyword    ${CURDIR}  ...
+
+Another Test
+    My Keyword
+*Rescan*, My Test, Another Test|
+=-=-=
+
+Name: Imenu - Test cases and Keywords
+=-=
+This should not be included
+
+*** Keywords ***
+
+My Keyword
+   Log    "ABC"
+
+*** Test Cases ***
+My Test
+    My Keyword    ${CURDIR}  ...
+
+Another Test
+    My Keyword
+|
+=-=
+This should not be included
+
+*** Keywords ***
+
+My Keyword
+   Log    "ABC"
+
+*** Test Cases ***
+My Test
+    My Keyword    ${CURDIR}  ...
+
+Another Test
+    My Keyword
+*Rescan*, My Keyword, My Test, Another Test|
+=-=-=
