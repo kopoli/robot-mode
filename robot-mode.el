@@ -188,6 +188,8 @@ indenting a line. Otherwise move `point' always `back-to-indentation'."
   (with-syntax-table (make-syntax-table)
     (modify-syntax-entry ?# "<")
     (modify-syntax-entry ?\n ">")
+    (modify-syntax-entry ?\" ".")
+    (modify-syntax-entry ?\' ".")
     (syntax-table))
   "Syntax table for Robot mode.")
 
